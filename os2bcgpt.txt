@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+// Bubble sort implementation
+void bubble_sort(int a[], int n) {
+    int temp;
+    int swapped;
+
+    do {
+        swapped = 0;
+        for (int i = 1; i < n; i++) {
+            if (a[i - 1] > a[i]) {
+                // Swap arr[i-1] and arr[i]
+                temp = a[i - 1];
+                a[i - 1] = a[i];
+                a[i] = temp;
+                swapped = 1;
+            }
+        }
+    } while (swapped);
+}
+
+int main(int argc, char *argv[]) {
+    int n = argc - 1;
+    int a[n];
+
+    printf("Enter %d integers: ", n);
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &a[i]);
+    }
+
+    // Sort the array using bubble sort
+    bubble_sort(a, n);
+
+    // Create a new program name to be executed by the child
+    char *child_program = "display_reverse_array";
+
+    // Create an array of arguments to pass to the child program
+    char *child_argv[n + 2];
+    child_argv[0] = child_program;
+    for (int i = 0; i < n; i++) {
+        child_argv[i + 1] = malloc(12);
+        sprintf(child_argv[i + 1], "%d", a[i]);
+    }
+    child_argv[n + 1] = NULL;
+
+    pid_t pid = fork();
+
+    if (pid == 0) {
+        // Child Process
+        execv(child_program, child_argv);
+        perror("execv"); // execv should not return unless there's an error
+        exit(1);
+    } else {
+        int k;
+        wait(&k);
+        printf("\nI am Parent Process, my pid is %d\n", getpid());
+    }
+
+    return 0;
+}
+
+
+//new program
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char *argv[]) {
+    for (int i = argc - 1; i > 0; i++) {
+        printf("%s\n", argv[i]);
+    }
+
+    return 0;
+}
